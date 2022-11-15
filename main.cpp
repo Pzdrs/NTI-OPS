@@ -1,72 +1,58 @@
-#include <iostream>
 #include "mbed.h"
+#include "LCD_DISCO_F469NI.h"
+#include "stm32469i_discovery_lcd.h"
+#include "diskoteka.h"
+LCD_DISCO_F469NI lcd;
 
-DigitalOut led(LED1);
-using namespace std;
-void blink(const string& basicString);
+#define T1DELAY 1s
+#define T2DELAY 1500ms
+#define T3DELAY 500ms
 
-const float DOT_DURATION = 0.2;
-const float DASH_DURATION = 0.8;
-const float DOT_DASH_SPACE = 0.5;
-const float LETTER_PAUSE = 2;
+#define T1TEXT "Thread 1"
+#define T2TEXT "Thread 2"
+#define T3TEXT "Thread 3"
 
-int main() {
-    std::string morseCode[26];
-    morseCode[0] = ".-"; //A
-    morseCode[1] = "-..."; //B
-    morseCode[2] = "-.-."; //C
-    morseCode[3] = "-.."; //D
-    morseCode[4] = "."; //E
-    morseCode[5] = "..-."; //F
-    morseCode[6] = "--."; //G
-    morseCode[7] = "...."; //H
-    morseCode[8] = ".."; //I
-    morseCode[9] = ".---"; //J
-    morseCode[10] = "-.-"; //K
-    morseCode[11] = ".-.."; //L
-    morseCode[12] = "--"; //M
-    morseCode[13] = "-."; //N
-    morseCode[14] = "---"; //O
-    morseCode[15] = ".--."; //P
-    morseCode[16] = "--.-"; //Q
-    morseCode[17] = ".-."; //R
-    morseCode[18] = "..."; //S
-    morseCode[19] = "-"; //T
-    morseCode[20] = "..-"; //U
-    morseCode[21] = "...-"; //V
-    morseCode[22] = ".--"; //W
-    morseCode[23] = "-..-"; //X
-    morseCode[24] = "-.--"; //Y
-    morseCode[25] = "--.."; //Z
+Thread t1,t2,t3;
 
-    string name = "petr";
-
-    while(1)
-    {
-        for (int i = 0; i < name.size(); i++) {
-            blink(morseCode[name[i] - 'a']);
-        }
+void worker1(){
+    while (true) {
+        lcd.SetTextColor(LCD_COLOR_BLACK); 
+        lcd.DisplayStringAt(0, LINE(1), (uint8_t *)T1TEXT, CENTER_MODE);
+        ThisThread::sleep_for(T1DELAY);
+        lcd.SetTextColor(LCD_COLOR_WHITE); 
+        lcd.DisplayStringAt(0, LINE(1), (uint8_t *)T1TEXT, CENTER_MODE);
+        ThisThread::sleep_for(T1DELAY);
     }
-
-    return 0;
 }
 
-void blink(const string& code) {
-    for (int i = 0; i < code.size(); i++) {
-        switch(code[i]) {
-            case '.':
-                led = 0;
-                wait(DOT_DURATION);
-                break;
-            case '-':
-                led = 0;
-                wait(DASH_DURATION);
-                break;
-            default:
-                break;
-        }
-        led = 1;
-        wait(DOT_DASH_SPACE);
+void worker2(){
+    while (true) {
+        lcd.SetTextColor(LCD_COLOR_BLACK); 
+        lcd.DisplayStringAt(0, LINE(2), (uint8_t *)T2TEXT, CENTER_MODE);
+        ThisThread::sleep_for(T2DELAY);
+        lcd.SetTextColor(LCD_COLOR_WHITE); 
+        lcd.DisplayStringAt(0, LINE(2), (uint8_t *)T2TEXT, CENTER_MODE);
+        ThisThread::sleep_for(T2DELAY);
     }
-    wait(LETTER_PAUSE);
 }
+
+void worker3(){
+    while (true) {
+        lcd.SetTextColor(LCD_COLOR_BLACK); 
+        lcd.DisplayStringAt(0, LINE(3), (uint8_t *)T3TEXT, CENTER_MODE);
+        ThisThread::sleep_for(T3DELAY);
+        lcd.SetTextColor(LCD_COLOR_WHITE); 
+        lcd.DisplayStringAt(0, LINE(3), (uint8_t *)T3TEXT, CENTER_MODE);
+        ThisThread::sleep_for(T3DELAY);
+    }
+}
+
+
+int main() {  
+    lcd.Clear(LCD_COLOR_WHITE);
+    lcd.SetBackColor(LCD_COLOR_WHITE);
+    t1.start(worker1);
+    t2.start(worker2);
+    t3.start(worker3);
+}
+
